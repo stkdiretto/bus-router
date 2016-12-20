@@ -77,3 +77,6 @@ For example, if we take `route_id` **MARTA_110**, bus-router only creates new ro
 
 This is to cut down on the number of Google Maps API requests and because I didn't implement a database here...
 
+### Routing profiles
+
+The public router at project-osrm.org works quite well with buses that use the regular car lanes. And not quite so well when vehicles use their own lanes, e.g., bus lanes, bus terminals or tram tracks.

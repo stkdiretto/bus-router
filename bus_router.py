@@ -59,7 +59,7 @@ def decode(point_str):
 		if coord & 0x1:
 			coord = ~coord #invert
 		coord >>= 1
-		coord /= 100000.0
+		coord /= 10000.0
 					
 		coords.append(coord)
 	
@@ -118,10 +118,10 @@ def processPolylines():
 							legpoints.append(dictpoint)
 						gmaps.close()
 					elif args.dir == 'osrm':
-						if linedata['status'] != 0:
+						if linedata['code'] != "Ok":
 							continue
-						print linedata['route_geometry']
-						points = decode(linedata['route_geometry'])
+						print linedata['routes'][0]['geometry']
+						points = decode(linedata['routes'][0]['geometry'])
 						# print points
 						for point in points:
 							dictpoint = {'x': point[0]/10, 'y': point[1]/10}
@@ -235,15 +235,15 @@ def getDirections():
 			# print lastCheck
 			if stopcount == 1:
 				# print "first stop"
-				origin = stop['lat'] + "," + stop['lon']
+				origin = stop['lon'] + "," + stop['lat']
 
 				if segmentcount > 0:
-					origin = stops['stops'][index - 1]['lat'] + "," + stops['stops'][index - 1]['lon']
-					waypoints += stop['lat'] + "," + stop['lon'] + "|"
-					osrmpoints.append(stop['lat'] + "," + stop['lon'])
+					origin = stops['stops'][index - 1]['lon'] + "," + stops['stops'][index - 1]['lat']
+					waypoints += stop['lon'] + "," + stop['lat'] + "|"
+					osrmpoints.append(stop['lon'] + "," + stop['lat'])
 
 				if lastCheck == 0:
-					dest = stop['lat'] + "," + stop['lon']
+					dest = stop['lon'] + "," + stop['lat']
 					if args.dir == 'goog':
 						directionscall(google_key, stop, origin, dest, waypoints, fname)
 					elif args.dir == 'osrm':
@@ -256,7 +256,7 @@ def getDirections():
 				stopcount += 1
 
 			elif stopcount == 9 or lastCheck == 0:
-				dest = stop['lat'] + "," + stop['lon'] 
+				dest = stop['lon'] + "," + stop['lat'] 
 				if args.dir == 'goog':
 					directionscall(google_key, stop, origin, dest, waypoints, fname)
 				elif args.dir == 'osrm':
@@ -267,8 +267,8 @@ def getDirections():
 				segmentcount += 1
 				continue
 			else:
-				waypoints += stop['lat'] + "," + stop['lon'] + "|"
-				osrmpoints.append(stop['lat'] + "," + stop['lon'])
+				waypoints += stop['lon'] + "," + stop['lat'] + "|"
+				osrmpoints.append(stop['lon'] + "," + stop['lat'])
 				stopcount += 1
 
 
@@ -287,12 +287,12 @@ def directionscall(google_key, stop, origin, dest, waypoints, fname):
 
 def osrmDirectionsCall(stop, origin, dest, osrmpoints, fname):
 	print "getting dirs..."
-	base = 'http://router.project-osrm.org/viaroute?'
+	base = 'http://router.project-osrm.org/route/v1/driving/'
 	viastring = ""
 	for point in osrmpoints:
-		viastring += 'loc=' + point + '&'
+		viastring += point + ';'
 
-	params = 'loc=' + origin + '&' + viastring + 'loc=' + dest
+	params = origin + ';' + viastring +  dest + '?geometries=polyline&overview=full'
 	# params = urllib.urlencode({'loc': origin, 'loc': dest, 'waypoints': waypoints, 'sensor': 'false','key': google_key})
 	print params
 	# if waypoints == "":

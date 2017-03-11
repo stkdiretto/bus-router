@@ -5,6 +5,12 @@ Ever come across a GTFS feed without the optional shapes.txt file?  bus-router c
 
 :balloon::birthday:**NEW!!**:balloon::birthday: bus-router now creates valid GeoJSON from your shapes.txt file so that you can play with/view the routes in [geojson.io](http://geojson.io), [gist](https://gist.github.com), [GitHub](https://help.github.com/articles/mapping-geojson-files-on-github), etc.
 
+## Changes from the original version
+
+ * Updates OSRM API calls from v4 to the current (as of 2016) v5
+ * Allows custom OSRM API endpoints to be able to use your custom bus/psv/tram router
+ * Drops Google Maps API option due to licensing problems
+
 ## Requirements
 
 Need Python 2.7 and pip to install geojson package.
@@ -53,17 +59,21 @@ optional arguments:
 
 ## Notes on Data Licensing
 
-### Google Directions API
-It should be noted that using the [Google Directions API](https://developers.google.com/maps/documentation/directions/) to create these routes is [questionable at best from a licensing perspective](https://groups.google.com/d/msg/transit-developers/EIe2dRsRWyY/IlGSd2oPG0gJ) ([Google ToS](https://developers.google.com/maps/terms)).  Ironically enough, this tool could very well be used by public transport agencies to feed data to Google Transit...
-
-*UPDATE*: It is now pretty explicitly against the [Google Maps Terms of Service](https://developers.google.com/maps/terms) to use the API to create these routes under the new derivative works section 10.5 b.
-
-### OSRM API/OpenStreetMap
 The default option for creating bus routes here is the [Open Source Routing Machine (OSRM)](http://project-osrm.org/).  As such, any routes derived from this tool is subject to the [ODbL](http://opendatacommons.org/licenses/odbl/).  
 
 Be sure that any use of this tool is respectful of OSRM's [API Usage Policy](https://github.com/Project-OSRM/osrm-backend/wiki/Api-usage-policy).
 
 Big thanks to OSRM for creating a routing engine for the entire globe!
+
+## Setting up your router
+
+bbox 9.8	48.3	10.06	48.48
+http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=9.8,48.3,10.06,48.48]
+wget -O 20170311ulm.osm "http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=9.8,48.3,10.06,48.48]"
+osmconvert 20170311ulm.osm -o=20170311ulm.osm.pbf
+osrm-extract 20170311ulm.osm.pbf -p osrm-backend/profiles/bus.lua
+osrm-contract 20170311ulm.osrm
+
 
 ## Known Limitations
 
@@ -75,8 +85,14 @@ There are a few finicky things about this script at the moment.
 ### Shapes limited to unique `route_id` + `trip_headsign` combinations
 For example, if we take `route_id` **MARTA_110**, bus-router only creates new route shapes for each of the `trip_headsign` values associated with this route.  So if there are two trip headsigns but actually 4 different trip patterns, bus-router will only generate 2 shapes.  
 
-This is to cut down on the number of Google Maps API requests and because I didn't implement a database here...
+This is to cut down on the number of API requests and because I didn't implement a database here...
 
 ### Routing profiles
 
 The public router at project-osrm.org works quite well with buses that use the regular car lanes. And not quite so well when vehicles use their own lanes, e.g., bus lanes, bus terminals or tram tracks.
+
+## Things To Do
+
+ * Allow passing of simplification option through the command line
+ * Write documentation on how to group trips with the same journey pattern and give them at least a temporary common headsign
+ * Write documentation on how to download OSM map extracts for your area, setting up your own OSRM with transit routing profile

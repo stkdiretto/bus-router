@@ -136,7 +136,8 @@ def processPolylines():
 			if not legpoints:
 				continue
 			else:
-				simplified = simplify(legpoints, .0002, True)
+				# simplified = simplify(legpoints, .0002, True)
+				simplified = legpoints
 				# print "new:" + str(simplified)
 				count = 0
 				for point in simplified:
@@ -247,7 +248,9 @@ def getDirections():
 					if args.dir == 'goog':
 						directionscall(google_key, stop, origin, dest, waypoints, fname)
 					elif args.dir == 'osrm':
-						osrmDirectionsCall(stop, origin, dest, osrmpoints, fname)
+						osrmDirectionsCall(stop, origin, dest, osrmpoints, fname, 'http://router.project-osrm.org/route/v1/driving/')
+					elif args.dir == 'osrmlocal':
+						osrmDirectionsCall(stop, origin, dest, osrmpoints, fname, 'http://127.0.0.1:5000/route/v1/driving/')
 					waypoints = ""
 					osrmpoints = []
 					segmentcount += 1
@@ -260,7 +263,9 @@ def getDirections():
 				if args.dir == 'goog':
 					directionscall(google_key, stop, origin, dest, waypoints, fname)
 				elif args.dir == 'osrm':
-					osrmDirectionsCall(stop, origin, dest, osrmpoints, fname)
+					osrmDirectionsCall(stop, origin, dest, osrmpoints, fname, 'http://router.project-osrm.org/route/v1/driving/')
+				elif args.dir == 'osrmlocal':
+					osrmDirectionsCall(stop, origin, dest, osrmpoints, fname, 'http://127.0.0.1:5000/route/v1/driving/')
 				stopcount = 1
 				waypoints = ""
 				osrmpoints = []
@@ -272,22 +277,8 @@ def getDirections():
 				stopcount += 1
 
 
-def directionscall(google_key, stop, origin, dest, waypoints, fname):
+def osrmDirectionsCall(stop, origin, dest, osrmpoints, fname, base):
 	print "getting dirs..."
-	base = 'https://maps.googleapis.com/maps/api/directions/json?'
-	params = urllib.urlencode({'origin': origin, 'destination': dest, 'waypoints': waypoints, 'sensor': 'false','key': google_key})
-	# print params
-	# if waypoints == "":
-	with open("log.txt", 'a') as log:
-		log.write(base + params + '\n')
-	response = urllib.urlopen(base + params)
-	data = json.load(response)
-	with open(fname, 'w') as outfile:
-		json.dump(data, outfile)
-
-def osrmDirectionsCall(stop, origin, dest, osrmpoints, fname):
-	print "getting dirs..."
-	base = 'http://router.project-osrm.org/route/v1/driving/'
 	viastring = ""
 	for point in osrmpoints:
 		viastring += point + ';'

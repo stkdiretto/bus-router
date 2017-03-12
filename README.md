@@ -67,12 +67,10 @@ Big thanks to OSRM for creating a routing engine for the entire globe!
 
 ## Setting up your router
 
-bbox 9.8	48.3	10.06	48.48
-http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=9.8,48.3,10.06,48.48]
-wget -O 20170311ulm.osm "http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=9.8,48.3,10.06,48.48]"
-osmconvert 20170311ulm.osm -o=20170311ulm.osm.pbf
-osrm-extract 20170311ulm.osm.pbf -p osrm-backend/profiles/bus.lua
-osrm-contract 20170311ulm.osrm
+ * Download the OSM data for your region. E.g., for the Ulm area, that would be something like ```wget -O ulm.osm "http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=9.8,48.3,10.06,48.48]"```
+ * Convert the downloaded data to PBF: ```osmconvert 20170311ulm.osm -o=20170311ulm.osm.pbf```
+ * Build your router as specified in [Running OSRM](https://github.com/Project-OSRM/osrm-backend/wiki/Running-OSRM): ```osrm-extract ulm.osm.pbf -p osrm-backend/profiles/bus.lua && osrm-contract ulm.osrm```. My bus routing is not yet ready, but [DoFabien/OSRM-Bus-profile](https://github.com/DoFabien/OSRM-Bus-profile) might serve as a base
+ * Run the router and fire away
 
 
 ## Known Limitations
@@ -95,4 +93,3 @@ The public router at project-osrm.org works quite well with buses that use the r
 
  * Allow passing of simplification option through the command line
  * Write documentation on how to group trips with the same journey pattern and give them at least a temporary common headsign
- * Write documentation on how to download OSM map extracts for your area, setting up your own OSRM with transit routing profile
